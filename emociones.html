@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTLVTE - Emociones</title>
+    <link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" type="image/x-icon">
+    
+    <!-- LIBRERÍA DE IA PARA DETECCIÓN FACIAL Y EMOCIONES -->
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+
+    <style>
+        :root { 
+            --utlvte-green: #008a3c; 
+            --utlvte-red: #d9232a; 
+            --dark-color: #222222; 
+            --bg-light: #f4f6f8; 
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--dark-color); min-height: 100vh; position: relative; }
+        
+        /* MARCA DE AGUA DERECHA */
+        body::before { 
+            content: ""; position: fixed; top: 50%; right: 2%; transform: translateY(-50%); 
+            width: 500px; height: 500px; 
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png'); 
+            background-repeat: no-repeat; background-position: center; background-size: contain; 
+            opacity: 0.10; pointer-events: none; z-index: -1; 
+        }
+
+        /* CABECERA */
+        .top-header { background: #fff; padding: 15px 20px; display: flex; justify-content: center; border-bottom: 1px solid #e0e0e0; }
+        .brand-container { display: flex; align-items: center; gap: 20px; }
+        .header-logo { height: 85px; }
+        .brand-titles { text-align: center; }
+        .utlvte-main { color: var(--utlvte-green); font-size: 3rem; font-weight: 900; font-style: italic; line-height: 1; }
+        .utlvte-sub { color: var(--utlvte-red); font-size: 1.15rem; font-weight: bold; font-style: italic; }
+
+        /* NAVEGACIÓN */
+        .main-nav { background: var(--utlvte-green); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .nav-list { display: flex; justify-content: center; list-style: none; flex-wrap: wrap; }
+        .nav-link { display: block; padding: 14px 22px; color: #fff; text-decoration: none; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; transition: background 0.2s; }
+        .nav-link:hover { background: rgba(0, 0, 0, 0.15); }
+        .nav-item.active .nav-link { color: #ff3b30; }
+
+        /* CONTENEDOR PRINCIPAL */
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 30px; }
+
+        .card { background: rgba(255,255,255,0.98); padding: 25px; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); border-top: 5px solid var(--utlvte-green); }
+        .card h2 { color: var(--utlvte-green); margin-bottom: 15px; font-size: 1.5rem; }
+
+        /* ESTADO DEL MODELO DE IA */
+        .ai-status {
+            background: #e8f5e9;
+            border: 1px solid var(--utlvte-green);
+            color: var(--utlvte-green);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* SELECTOR DE MODALIDAD */
+        .mode-selector { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 25px; }
+        .btn-mode { padding: 12px 20px; border: 2px solid var(--utlvte-green); background: #fff; color: var(--utlvte-green); font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .btn-mode.active, .btn-mode:hover { background: var(--utlvte-green); color: #fff; }
+
+        /* ÁREA DE VISUALIZACIÓN DE CÁMARA */
+        .demo-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; align-items: start; }
+        
+        .preview-wrapper {
+            position: relative;
+            width: 100%;
+            height: 340px;
+            background: #111;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-wrapper video, .preview-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #placeholderText { color: #fff; text-align: center; padding: 20px; font-weight: 600; }
+
+        /* RESULTADOS Y BARRAS DE PROBABILIDAD */
+        .results-panel { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+        .main-emotion { text-align: center; margin-bottom: 20px; }
+        .emotion-badge { font-size: 2.2rem; font-weight: 800; color: var(--utlvte-green); display: block; margin-top: 5px; }
+
+        .emotion-bar-item { margin-bottom: 12px; }
+        .bar-label { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+        .bar-track { height: 12px; background: #e0e0e0; border-radius: 6px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--utlvte-green); width: 0%; transition: width 0.3s ease; }
+
+        /* OPCIONES MANUALES */
+        .manual-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 15px; }
+        .btn-exp { background: #fff; border: 1px solid #ccc; padding: 10px; border-radius: 6px; text-align: center; cursor: pointer; transition: background 0.2s; font-weight: 600; }
+        .btn-exp:hover { background: #e8f5e9; border-color: var(--utlvte-green); }
+
+        /* FOOTER Y CHATBOT */
+        footer { background: var(--dark-color); color: white; text-align: center; padding: 25px; margin-top: 50px; }
+        .chatbot-btn { position: fixed; bottom: 25px; right: 25px; background: var(--utlvte-green); color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 26px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 2000; }
+        .chat-window { display: none; position: fixed; bottom: 95px; right: 25px; width: 320px; height: 420px; background: #fff; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.25); flex-direction: column; z-index: 2000; }
+        .chat-header { background: var(--utlvte-green); color: white; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.88rem; }
+        .bot-msg { background: #e4e6eb; align-self: flex-start; }
+        .user-msg { background: var(--utlvte-green); color: white; align-self: flex-end; }
+        .chat-footer { display: flex; padding: 10px; border-top: 1px solid #ddd; }
+        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .chat-footer button { background: var(--utlvte-green); color: white; border: none; padding: 8px 12px; margin-left: 5px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA -->
+    <header class="top-header">
+        <div class="brand-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png" class="header-logo" alt="Escudo UTLVTE">
+            <div class="brand-titles">
+                <div class="utlvte-sub">UNIVERSIDAD TÉCNICA "LUIS VARGAS TORRES" DE ESMERALDAS</div>
+                <div class="utlvte-sub">SEDE SANTO DOMINGO - LA CONCORDIA</div>
+                <div class="utlvte-main">UTLVTE</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="main-nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="nosotros.html" class="nav-link">Nosotros</a></li>
+            <li class="nav-item"><a href="carreras.html" class="nav-link">Carreras</a></li>
+            <li class="nav-item"><a href="servicios.html" class="nav-link">Servicios</a></li>
+            <li class="nav-item"><a href="historia.html" class="nav-link">Historia</a></li>
+            <li class="nav-item"><a href="contacto.html" class="nav-link">Contacto</a></li>
+            <li class="nav-item"><a href="juego.html" class="nav-link">Juego</a></li>
+            <li class="nav-item active"><a href="emociones.html" class="nav-link">Emociones</a></li>
+            <li class="nav-item"><a href="promedio.html" class="nav-link">Promedio</a></li>
+        </ul>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container">
+        
+        <section class="card">
+            <h2>🧠 Reconocimiento Facial de Emociones (Sin Neutralidad)</h2>
+            <div class="ai-status" id="aiStatus">⏳ Cargando modelos de Inteligencia Artificial (Redes Neuronales)...</div>
+
+            <div class="mode-selector">
+                <button class="btn-mode active" id="btnCam" onclick="setMode('camera')">📹 Cámara Web en Vivo</button>
+                <button class="btn-mode" id="btnUpload" onclick="setMode('upload')">📁 Cargar Imagen</button>
+                <button class="btn-mode" id="btnManual" onclick="setMode('manual')">🖐️ Probar Expresiones</button>
+            </div>
+
+            <div class="demo-layout">
+                <!-- VISTA PREVIA Y CANVAS DE DETECCIÓN -->
+                <div>
+                    <div class="preview-wrapper" id="previewContainer">
+                        <div id="placeholderText">Presiona "Cámara Web en Vivo" para iniciar la detección en tiempo real</div>
+                        <video id="webcamVideo" autoplay playsinline style="display:none;"></video>
+                        <img id="imagePreview" style="display:none;" alt="Vista previa">
+                        <canvas id="canvasOverlay" class="canvas-overlay"></canvas>
+                    </div>
+
+                    <div id="uploadControl" style="display:none; margin-top: 15px;">
+                        <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
+                    </div>
+
+                    <div id="manualControl" style="display:none; margin-top: 15px;">
+                        <p style="font-weight:600; font-size:0.9rem; margin-bottom:8px;">Simular emociones predefinidas:</p>
+                        <div class="manual-options">
+                            <button class="btn-exp" onclick="simularManual('alegria')">😊 Alegría</button>
+                            <button class="btn-exp" onclick="simularManual('tristeza')">😢 Tristeza</button>
+                            <button class="btn-exp" onclick="simularManual('enojo')">😠 Enojo</button>
+                            <button class="btn-exp" onclick="simularManual('sorpresa')">😲 Sorpresa</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL DE RESULTADOS REALES (SOLO 4 EMOCIONES) -->
+                <div class="results-panel">
+                    <div class="main-emotion">
+                        <span style="font-size:0.9rem; color:#666;">Emoción Principal Identificada:</span>
+                        <span class="emotion-badge" id="detectedEmotion">Esperando rostro...</span>
+                    </div>
+
+                    <div id="barsContainer">
+                        <div class="emotion-bar-item">
+                            <div class="bar-label"><span>😊 Alegría</span><span id="val-alegria">0%</span></div>
+                            <div class="bar-track"><div class="bar-fill" id="bar-alegria"></div></div>
+                        </div>
+                        <div class="emotion-bar-item">
+                            <div class="bar-label"><span>😢 Tristeza</span><span id="val-tristeza">0%</span></div>
+                            <div class="bar-track"><div class="bar-fill" id="bar-tristeza"></div></div>
+                        </div>
+                        <div class="emotion-bar-item">
+                            <div class="bar-label"><span>😠 Enojo</span><span id="val-enojo">0%</span></div>
+                            <div class="bar-track"><div class="bar-fill" id="bar-enojo"></div></div>
+                        </div>
+                        <div class="emotion-bar-item">
+                            <div class="bar-label"><span>😲 Sorpresa</span><span id="val-sorpresa">0%</span></div>
+                            <div class="bar-track"><div class="bar-fill" id="bar-sorpresa"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CHATBOT -->
+    <button class="chatbot-btn" onclick="toggleChat()">💬</button>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <span>Asistente UTLVTE</span>
+            <button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="message bot-msg">¡Hola! Se ha ajustado la IA para detectar exclusivamente Alegría, Tristeza, Enojo y Sorpresa.</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="userInput" placeholder="Escribe tu consulta..." onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Universidad Técnica Luis Vargas Torres de Esmeraldas - Sede Santo Domingo</p>
+    </footer>
+
+    <script>
+        let currentStream = null;
+        let detectionInterval = null;
+        let modelsLoaded = false;
+
+        const MODEL_URL = 'https://vladmandic.github.io/face-api/model/';
+
+        async function loadAIModels() {
+            try {
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+                modelsLoaded = true;
+                document.getElementById('aiStatus').style.background = '#d4edda';
+                document.getElementById('aiStatus').style.color = '#155724';
+                document.getElementById('aiStatus').innerText = '✅ Modelos de Inteligencia Artificial cargados correctamente.';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('aiStatus').innerText = '⚠️ Los modelos de IA no se pudieron cargar. Puedes usar la selección manual.';
+            }
+        }
+
+        loadAIModels();
+
+        function setMode(mode) {
+            stopDetection();
+            document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
+            
+            const video = document.getElementById('webcamVideo');
+            const img = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('placeholderText');
+            const uploadControl = document.getElementById('uploadControl');
+            const manualControl = document.getElementById('manualControl');
+
+            video.style.display = 'none';
+            img.style.display = 'none';
+            uploadControl.style.display = 'none';
+            manualControl.style.display = 'none';
+
+            if (mode === 'camera') {
+                document.getElementById('btnCam').classList.add('active');
+                placeholder.style.display = 'block';
+                placeholder.innerText = 'Iniciando Cámara Web...';
+                startCamera();
+            } else if (mode === 'upload') {
+                document.getElementById('btnUpload').classList.add('active');
+                placeholder.style.display = 'block';
+                placeholder.innerText = 'Selecciona una imagen con rostro desde tu dispositivo';
+                uploadControl.style.display = 'block';
+            } else if (mode === 'manual') {
+                document.getElementById('btnManual').classList.add('active');
+                placeholder.style.display = 'none';
+                manualControl.style.display = 'block';
+                simularManual('alegria');
+            }
+        }
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                currentStream = stream;
+                const video = document.getElementById('webcamVideo');
+                video.srcObject = stream;
+                video.style.display = 'block';
+                document.getElementById('placeholderText').style.display = 'none';
+
+                video.onloadedmetadata = () => {
+                    startRealTimeDetection(video);
+                };
+            } catch (err) {
+                alert('No se pudo acceder a la cámara. Asegúrate de dar permisos en tu navegador.');
+            }
+        }
+
+        function stopDetection() {
+            if (detectionInterval) clearInterval(detectionInterval);
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            const canvas = document.getElementById('canvasOverlay');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function startRealTimeDetection(video) {
+            const canvas = document.getElementById('canvasOverlay');
+            const displaySize = { width: video.clientWidth || 320, height: video.clientHeight || 240 };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            detectionInterval = setInterval(async () => {
+                if (!modelsLoaded) return;
+
+                const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withFaceExpressions();
+
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (detections) {
+                    const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                    faceapi.draw.drawDetections(canvas, resizedDetections);
+                    
+                    procesarExpresionesSinNeutral(detections.expressions);
+                } else {
+                    document.getElementById('detectedEmotion').innerText = 'No se detecta rostro';
+                }
+            }, 150);
+        }
+
+        // ALGORITMO EXCLUSIVO: Elimina la emoción Neutral y reparte el 100% entre las 4 emociones vivas
+        function procesarExpresionesSinNeutral(exp) {
+            const raw = {
+                alegria: exp.happy || 0.01,
+                tristeza: exp.sad || 0.01,
+                enojo: exp.angry || 0.01,
+                sorpresa: exp.surprised || 0.01
+            };
+
+            const total = raw.alegria + raw.tristeza + raw.enojo + raw.sorpresa || 1;
+
+            const mapeo = {
+                alegria: Math.min(100, Math.round((raw.alegria / total) * 100)),
+                tristeza: Math.min(100, Math.round((raw.tristeza / total) * 100)),
+                enojo: Math.min(100, Math.round((raw.enojo / total) * 100)),
+                sorpresa: Math.min(100, Math.round((raw.sorpresa / total) * 100))
+            };
+
+            let maxVal = -1;
+            let emocionDominante = 'Evaluando...';
+
+            const etiquetas = {
+                alegria: 'Alegría 😊',
+                tristeza: 'Tristeza 😢',
+                enojo: 'Enojo 😠',
+                sorpresa: 'Sorpresa 😲'
+            };
+
+            for (let key in mapeo) {
+                const porcentaje = mapeo[key];
+                document.getElementById(`val-${key}`).innerText = `${porcentaje}%`;
+                document.getElementById(`bar-${key}`).style.width = `${porcentaje}%`;
+
+                if (porcentaje > maxVal) {
+                    maxVal = porcentaje;
+                    emocionDominante = etiquetas[key];
+                }
+            }
+
+            document.getElementById('detectedEmotion').innerText = emocionDominante;
+        }
+
+        async function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const img = document.getElementById('imagePreview');
+                img.src = event.target.result;
+                img.style.display = 'block';
+                document.getElementById('placeholderText').style.display = 'none';
+
+                img.onload = async () => {
+                    if (modelsLoaded) {
+                        const detections = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+                        if (detections) {
+                            procesarExpresionesSinNeutral(detections.expressions);
+                        } else {
+                            document.getElementById('detectedEmotion').innerText = 'No se encontró rostro en la foto';
+                        }
+                    }
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function simularManual(key) {
+            const perfiles = {
+                alegria: { label: 'Alegría 😊', values: { alegria: 96, sorpresa: 4, tristeza: 0, enojo: 0 } },
+                tristeza: { label: 'Tristeza 😢', values: { tristeza: 92, enojo: 8, alegria: 0, sorpresa: 0 } },
+                enojo: { label: 'Enojo 😠', values: { enojo: 90, tristeza: 10, alegria: 0, sorpresa: 0 } },
+                sorpresa: { label: 'Sorpresa 😲', values: { sorpresa: 95, alegria: 5, tristeza: 0, enojo: 0 } }
+            };
+
+            const data = perfiles[key];
+            document.getElementById('detectedEmotion').innerText = data.label;
+            for (let k in data.values) {
+                document.getElementById(`val-${k}`).innerText = `${data.values[k]}%`;
+                document.getElementById(`bar-${k}`).style.width = `${data.values[k]}%`;
+            }
+        }
+
+        // CHATBOT JS
+        function toggleChat() {
+            const chat = document.getElementById('chatWindow');
+            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const b = document.getElementById('chatBody');
+            b.innerHTML += `<div class="message user-msg">${text}</div>`;
+            input.value = '';
+            b.scrollTop = b.scrollHeight;
+
+            setTimeout(() => {
+                b.innerHTML += `<div class="message bot-msg">El detector calcula únicamente: Alegría, Tristeza, Enojo y Sorpresa.</div>`;
+                b.scrollTop = b.scrollHeight;
+            }, 500);
+        }
+    </script>
+</body>
+</html>

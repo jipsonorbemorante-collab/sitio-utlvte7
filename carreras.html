@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carreras</title>
+    <link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" type="image/x-icon">
+    <style>
+        :root { 
+            --utlvte-green: #008a3c; 
+            --utlvte-red: #d9232a; 
+            --dark-color: #222222; 
+            --bg-light: #f4f6f8; 
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-light); 
+            color: var(--dark-color); 
+            min-height: 100vh; 
+            position: relative; 
+        }
+        
+        /* MARCA DE AGUA DERECHA (10% Opacidad) */
+        body::before { 
+            content: ""; 
+            position: fixed; 
+            top: 50%; 
+            right: 2%; 
+            transform: translateY(-50%); 
+            width: 500px; 
+            height: 500px; 
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png'); 
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: contain; 
+            opacity: 0.10; 
+            pointer-events: none; 
+            z-index: -1; 
+        }
+
+        /* CABECERA SUPERIOR */
+        .top-header { background: #fff; padding: 15px 20px; display: flex; justify-content: center; border-bottom: 1px solid #e0e0e0; }
+        .brand-container { display: flex; align-items: center; gap: 20px; }
+        .header-logo { height: 85px; }
+        .brand-titles { text-align: center; }
+        .utlvte-main { color: var(--utlvte-green); font-size: 3rem; font-weight: 900; font-style: italic; line-height: 1; }
+        .utlvte-sub { color: var(--utlvte-red); font-size: 1.15rem; font-weight: bold; font-style: italic; }
+
+        /* NAVEGACIÓN */
+        .main-nav { background: var(--utlvte-green); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .nav-list { display: flex; justify-content: center; list-style: none; flex-wrap: wrap; }
+        .nav-link { display: block; padding: 14px 22px; color: #fff; text-decoration: none; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; transition: background 0.2s; }
+        .nav-link:hover { background: rgba(0, 0, 0, 0.15); }
+        .nav-item.active .nav-link { color: #ff3b30; }
+
+        /* CONTENIDO PRINCIPAL */
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 30px; }
+        
+        .page-title {
+            text-align: center;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+            border-left: 6px solid var(--utlvte-green);
+        }
+
+        .page-title h1 { color: var(--utlvte-green); font-size: 2rem; margin-bottom: 8px; }
+        .page-title p { color: #555; font-size: 1rem; }
+
+        .carreras-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .carrera-card {
+            background: rgba(255,255,255,0.95);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+            border-top: 5px solid var(--utlvte-green);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .carrera-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .carrera-badge {
+            align-self: flex-start;
+            background-color: var(--utlvte-red);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .carrera-card h2 { color: var(--utlvte-green); font-size: 1.4rem; margin-bottom: 10px; }
+        .carrera-card p { color: #444; line-height: 1.6; font-size: 0.95rem; margin-bottom: 15px; }
+
+        .carrera-details {
+            list-style: none;
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+            font-size: 0.88rem;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .carrera-details li strong { color: var(--dark-color); }
+
+        .section-other {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+            border-top: 5px solid var(--utlvte-red);
+        }
+
+        .section-other h2 { color: var(--utlvte-red); margin-bottom: 15px; }
+        .other-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 10px; }
+        .other-item { background: #f8f9fa; padding: 12px 15px; border-radius: 6px; border-left: 4px solid var(--utlvte-green); font-weight: 600; font-size: 0.9rem; }
+
+        /* FOOTER */
+        footer { background: var(--dark-color); color: white; text-align: center; padding: 25px; margin-top: 50px; }
+
+        /* CHATBOT */
+        .chatbot-btn { position: fixed; bottom: 25px; right: 25px; background: var(--utlvte-green); color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 26px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 2000; }
+        .chat-window { display: none; position: fixed; bottom: 95px; right: 25px; width: 320px; height: 420px; background: #fff; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.25); flex-direction: column; z-index: 2000; }
+        .chat-header { background: var(--utlvte-green); color: white; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.88rem; }
+        .bot-msg { background: #e4e6eb; align-self: flex-start; }
+        .user-msg { background: var(--utlvte-green); color: white; align-self: flex-end; }
+        .chat-footer { display: flex; padding: 10px; border-top: 1px solid #ddd; }
+        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .chat-footer button { background: var(--utlvte-green); color: white; border: none; padding: 8px 12px; margin-left: 5px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA SUPERIOR -->
+    <header class="top-header">
+        <div class="brand-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png" class="header-logo" alt="Escudo UTLVTE">
+            <div class="brand-titles">
+                <div class="utlvte-sub">UNIVERSIDAD TÉCNICA "LUIS VARGAS TORRES" DE ESMERALDAS</div>
+                <div class="utlvte-sub">SEDE SANTO DOMINGO - LA CONCORDIA</div>
+                <div class="utlvte-main">UTLVTE</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MENÚ DE NAVEGACIÓN -->
+    <nav class="main-nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="historia.html" class="nav-link">Historia</a></li>
+            <li class="nav-item"><a href="nosotros.html" class="nav-link">Nosotros</a></li>
+            <li class="nav-item"><a href="servicios.html" class="nav-link">Servicios</a></li>
+            <li class="nav-item active"><a href="carreras.html" class="nav-link">Carreras</a></li>
+            <li class="nav-item"><a href="contacto.html" class="nav-link">Contacto</a></li>
+            <li class="nav-item"><a href="juego.html" class="nav-link">Juego</a></li>
+            <li class="nav-item"><a href="emociones.html" class="nav-link">Emociones</a></li>
+            <li class="nav-item"><a href="promedio.html" class="nav-link">Promedio</a></li>
+        </ul>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container">
+        
+        <div class="page-title">
+            <h1>Oferta Académica de Pregrado</h1>
+            <p>Carreras profesionales disponibles en la Sede Santo Domingo - La Concordia</p>
+        </div>
+
+        <section class="carreras-grid">
+            
+            <!-- CARRERA 1 -->
+            <article class="carrera-card">
+                <div>
+                    <span class="carrera-badge">Facultad de Ingenierías</span>
+                    <h2>Tecnologías de la Información</h2>
+                    <p>Forma profesionales capaces de analizar, diseñar, implementar y gestionar soluciones informáticas, infraestructura tecnológica, redes y desarrollo de software para el sector público y privado.</p>
+                </div>
+                <ul class="carrera-details">
+                    <li><strong>Modalidad:</strong> Presencial</li>
+                    <li><strong>Título que otorga:</strong> Ingeniero/a en Tecnologías de la Información</li>
+                    <li><strong>Duración:</strong> 9 Semestres</li>
+                    <li><strong>Lugar:</strong> Sede Santo Domingo - La Concordia</li>
+                </ul>
+            </article>
+
+            <!-- CARRERA 2 -->
+            <article class="carrera-card">
+                <div>
+                    <span class="carrera-badge">Facultad de Cs. Administrativas</span>
+                    <h2>Administración de Empresas</h2>
+                    <p>Prepara líderes con capacidad estratégica, emprendedora y de gestión organizacional, formados para dirigir empresas, proyectos de inversión y optimizar recursos con visión sostenible.</p>
+                </div>
+                <ul class="carrera-details">
+                    <li><strong>Modalidad:</strong> Presencial</li>
+                    <li><strong>Título que otorga:</strong> Licenciado/a en Administración de Empresas</li>
+                    <li><strong>Duración:</strong> 8 Semestres</li>
+                    <li><strong>Lugar:</strong> Sede Santo Domingo - La Concordia</li>
+                </ul>
+            </article>
+
+            <!-- CARRERA 3 -->
+            <article class="carrera-card">
+                <div>
+                    <span class="carrera-badge">Facultad de Cs. Administrativas</span>
+                    <h2>Contabilidad y Auditoría</h2>
+                    <p>Desarrolla competencias clave para controlar e interpretar la información financiera, ejecutar auditorías de gestión, asesoría tributaria y fortalecer la transparencia contable empresarial.</p>
+                </div>
+                <ul class="carrera-details">
+                    <li><strong>Modalidad:</strong> Presencial</li>
+                    <li><strong>Título que otorga:</strong> Licenciado/a en Contabilidad y Auditoría</li>
+                    <li><strong>Duración:</strong> 8 Semestres</li>
+                    <li><strong>Lugar:</strong> Sede Santo Domingo - La Concordia</li>
+                </ul>
+            </article>
+
+        </section>
+
+        <!-- OTRAS CARRERAS INSTITUCIONALES -->
+        <section class="section-other">
+            <h2>Oferta Académica General de la UTLVTE (Sede Matriz Esmeraldas)</h2>
+            <p>A nivel institucional, la Universidad Técnica Luis Vargas Torres también oferta las siguientes carreras de grado:</p>
+            
+            <div class="other-list">
+                <div class="other-item">Agronomía</div>
+                <div class="other-item">Zootecnia</div>
+                <div class="other-item">Trabajo Social</div>
+                <div class="other-item">Sociología</div>
+                <div class="other-item">Ingeniería Química</div>
+                <div class="other-item">Ingeniería Eléctrica</div>
+                <div class="other-item">Ingeniería Mecánica</div>
+                <div class="other-item">Educación Básica</div>
+                <div class="other-item">Educación Inicial</div>
+                <div class="other-item">Turismo</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CHATBOT -->
+    <button class="chatbot-btn" onclick="toggleChat()">💬</button>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <span>Asistente UTLVTE</span>
+            <button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="message bot-msg">¡Hola! Bienvenido al portal oficial. ¿En qué puedo ayudarte sobre nuestras carreras?</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="userInput" placeholder="Escribe tu consulta..." onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer>
+        <p>&copy; 2026 Universidad Técnica Luis Vargas Torres de Esmeraldas - Sede Santo Domingo</p>
+    </footer>
+
+    <!-- SCRIPT DEL CHATBOT Y NAVEGACIÓN -->
+    <script>
+        function toggleChat() {
+            const chat = document.getElementById('chatWindow');
+            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        const baseDeDatosBot = [
+            {
+                palabras: ['carrera', 'carreras', 'oferta', 'estudiar', 'profesion', 'titulos'],
+                respuesta: 'En la Sede Santo Domingo ofrecemos: Tecnologías de la Información, Administración de Empresas, y Contabilidad y Auditoría.'
+            },
+            {
+                palabras: ['admision', 'admisión', 'cupo', 'requisito', 'inscribir', 'postular', 'ingreso'],
+                respuesta: 'El proceso requiere: copia de cédula, título de bachiller y registro en la plataforma oficial de la UTLVTE.'
+            },
+            {
+                palabras: ['duracion', 'semestre', 'tiempo', 'años'],
+                respuesta: 'Todas las carreras de grado tienen una duración estimada de 8 semestres (4 años).'
+            },
+            {
+                palabras: ['contacto', 'telefono', 'correo', 'email', 'secretaria'],
+                respuesta: 'Escribe a: admision.santodomingo@ute-lvt.edu.ec o revisa la pestaña Contacto.'
+            }
+        ];
+
+        function getBotResponse(input) {
+            const texto = input.toLowerCase();
+            for (let item of baseDeDatosBot) {
+                if (item.palabras.some(p => texto.includes(p))) return item.respuesta;
+            }
+            return 'Para más información sobre las carreras o requisitos de admisión, consulta en la Secretaría de la Sede Santo Domingo.';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const b = document.getElementById('chatBody');
+            b.innerHTML += `<div class="message user-msg">${text}</div>`;
+            input.value = '';
+            b.scrollTop = b.scrollHeight;
+
+            setTimeout(() => {
+                b.innerHTML += `<div class="message bot-msg">${getBotResponse(text)}</div>`;
+                b.scrollTop = b.scrollHeight;
+            }, 500);
+        }
+    </script>
+</body>
+</html>

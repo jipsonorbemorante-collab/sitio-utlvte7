@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTLVTE - Inicio</title>
+    <link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" type="image/x-icon">
+    <style>
+        :root { --utlvte-green: #008a3c; --utlvte-red: #d9232a; --dark-color: #222222; --bg-light: #f4f6f8; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--dark-color); min-height: 100vh; position: relative; }
+        
+        /* MARCA DE AGUA DERECHA (10%) */
+        body::before {
+            content: ""; position: fixed; top: 50%; right: 2%; transform: translateY(-50%);
+            width: 500px; height: 500px;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png');
+            background-repeat: no-repeat; background-position: center; background-size: contain;
+            opacity: 0.10; pointer-events: none; z-index: -1;
+        }
+
+        .top-header { background: #fff; padding: 15px 20px; display: flex; justify-content: center; border-bottom: 1px solid #e0e0e0; }
+        .brand-container { display: flex; align-items: center; gap: 20px; }
+        .header-logo { height: 85px; }
+        .brand-titles { text-align: center; }
+        .utlvte-main { color: var(--utlvte-green); font-size: 3rem; font-weight: 900; font-style: italic; line-height: 1; }
+        .utlvte-sub { color: var(--utlvte-red); font-size: 1.15rem; font-weight: bold; font-style: italic; }
+
+        .main-nav { background: var(--utlvte-green); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .nav-list { display: flex; justify-content: center; list-style: none; }
+        .nav-link { display: block; padding: 14px 22px; color: #fff; text-decoration: none; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; }
+        .nav-link:hover { background: rgba(0, 0, 0, 0.15); }
+        .nav-item.active .nav-link { color: #ff3b30; }
+
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .hero-banner { background: linear-gradient(rgba(0, 138, 60, 0.85), rgba(0, 0, 0, 0.7)), url('https://via.placeholder.com/1200x350') center/cover; color: white; text-align: center; padding: 60px 20px; border-radius: 8px; }
+        .hero-banner h1 { font-size: 2.2rem; margin-bottom: 15px; }
+        
+        .grid-mv { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px; }
+        .card { background: rgba(255,255,255,0.95); padding: 25px; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); border-top: 5px solid var(--utlvte-green); }
+        .card h2 { color: var(--utlvte-green); margin-bottom: 12px; }
+
+        footer { background: var(--dark-color); color: white; text-align: center; padding: 25px; margin-top: 50px; }
+        
+        /* CHATBOT */
+        .chatbot-btn { position: fixed; bottom: 25px; right: 25px; background: var(--utlvte-green); color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 26px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 2000; }
+        .chat-window { display: none; position: fixed; bottom: 95px; right: 25px; width: 320px; height: 420px; background: #fff; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.25); flex-direction: column; z-index: 2000; }
+        .chat-header { background: var(--utlvte-green); color: white; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.88rem; }
+        .bot-msg { background: #e4e6eb; align-self: flex-start; }
+        .user-msg { background: var(--utlvte-green); color: white; align-self: flex-end; }
+        .chat-footer { display: flex; padding: 10px; border-top: 1px solid #ddd; }
+        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .chat-footer button { background: var(--utlvte-green); color: white; border: none; padding: 8px 12px; margin-left: 5px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header class="top-header">
+        <div class="brand-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png" class="header-logo">
+            <div class="brand-titles">
+                <div class="utlvte-sub">UNIVERSIDAD TÉCNICA "LUIS VARGAS TORRES" DE ESMERALDAS</div>
+                <div class="utlvte-sub">SEDE SANTO DOMINGO - LA CONCORDIA</div>
+                <div class="utlvte-main">UTLVTE</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <ul class="nav-list">
+            <li class="nav-item active"><a href="index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="historia.html" class="nav-link">Historia</a></li>
+            <li class="nav-item"><a href="nosotros.html" class="nav-link">Nosotros</a></li>
+            <li class="nav-item"><a href="servicios.html" class="nav-link">Servicios</a></li>
+            <li class="nav-item"><a href="carreras.html" class="nav-link">Carreras</a></li>
+            <li class="nav-item"><a href="contacto.html" class="nav-link">Contacto</a></li>
+            <li class="nav-item"><a href="juego.html" class="nav-link">Juego</a></li>
+            <li class="nav-item"><a href="emociones.html" class="nav-link">Emociones</a></li>
+            <li class="nav-item"><a href="promedio.html" class="nav-link">Promedio</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <section class="hero-banner">
+            <h1>Bienvenidos a la Universidad Técnica "Luis Vargas Torres" Sede Santo Domingo</h1>
+            <p><b>"Con la determinación de Luis Vargas Torres y la fuerza de tus sueños, ningún examen es demasiado grande: hoy estudias, mañana lideras. ¡La UTLVTE te espera!"</b></p>
+        </section>
+
+    </main>
+
+    <!-- CHATBOT -->
+    <button class="chatbot-btn" onclick="toggleChat()">💬</button>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header"><span>Asistente UTLVTE</span><button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;">✕</button></div>
+        <div class="chat-body" id="chatBody"><div class="message bot-msg">¡Hola! Bienvenido al portal oficial. ¿En qué puedo ayudarte?</div></div>
+        <div class="chat-footer">
+            <input type="text" id="userInput" placeholder="Escribe tu consulta..." onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+      
+    <footer>
+        <p>&copy; 2026 Universidad Técnica Luis Vargas Torres de Esmeraldas - Sede Santo Domingo</p>
+    </footer>
+
+   <script>
+    function toggleChat() {
+        const chat = document.getElementById('chatWindow');
+        chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    // Función para quitar tildes, mayúsculas y signos para que entienda todo
+    function limpiarTexto(texto) {
+        return texto.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^\w\s]/gi, '');
+    }
+
+    // Base de datos extendida
+    const baseDeDatosBot = [
+        {
+            palabras: ['hola', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'que tal', 'oe', 'holaa'],
+            respuesta: '¡Hola! Bienvenida/o al portal de la UTLVTE Sede Santo Domingo. ¿En qué te puedo ayudar hoy?'
+        },
+        {
+            palabras: ['admision', 'cupo', 'requisito', 'inscribir', 'postular', 'ingreso', 'inscripcion', 'matriula', 'entrar'],
+            respuesta: 'Para ingresar necesitas: copia de cédula a color, título de bachiller y registrarte en el sistema de admisión de la UTLVTE.'
+        },
+        {
+            palabras: ['carrera', 'carreras', 'oferta', 'estudiar', 'profesion', 'titulos', 'tecnologia', 'administracion', 'contabilidad'],
+            respuesta: 'En la Sede Santo Domingo ofertamos: 1) Tecnologías de la Información, 2) Administración de Empresas, 3) Contabilidad y Auditoría. Revisa la pestaña "Carreras" para más detalles.'
+        },
+        {
+            palabras: ['horario', 'clases', 'jornada', 'turno', 'seccion', 'nocturno', 'matutino'],
+            respuesta: 'Las clases se imparten en jornadas matutina y nocturna. Los horarios específicos se publican al iniciar cada semestre.'
+        },
+        {
+            palabras: ['ubicacion', 'direccion', 'donde', 'llegar', 'mapa', 'queda', 'concordia', 'lugar'],
+            respuesta: 'Nos encontramos en el Km 1.5 Vía La Villegas, Cantón La Concordia, Santo Domingo de los Tsáchilas. En la sección "Contacto" puedes ver el mapa en vivo.'
+        },
+        {
+            palabras: ['costo', 'precio', 'pagar', 'cuota', 'pension', 'gratis', 'valor', 'cuanto vale'],
+            respuesta: 'La educación superior en la UTLVTE es 100% gratuita al ser una universidad pública de la República del Ecuador.'
+        },
+        {
+            palabras: ['contacto', 'telefono', 'correo', 'email', 'secretaria', 'atencion', 'llamar'],
+            respuesta: 'Puedes llamar al (02) 275-0000 o escribir al correo oficial: admision.santodomingo@ute-lvt.edu.ec.'
+        },
+        {
+            palabras: ['certificado', 'record', 'nota', 'secretaria', 'papeles', 'tramite'],
+            respuesta: 'Los trámites de certificados y récords académicos se gestionan de forma presencial en la Secretaría Académica de la sede.'
+        },
+        {
+            palabras: ['gracias', 'agradecido', 'ok', 'listo', 'chevere', 'vale'],
+            respuesta: '¡Con gusto! Si tienes más preguntas, estaré por aquí para ayudarte.'
+        }
+    ];
+
+    function getBotResponse(input) {
+        const textoLimpio = limpiarTexto(input);
+
+        for (let item of baseDeDatosBot) {
+            // Busca si alguna palabra clave coincide
+            if (item.palabras.some(palabra => textoLimpio.includes(limpiarTexto(palabra)))) {
+                return item.respuesta;
+            }
+        }
+
+        // Respuesta inteligente por defecto
+        return 'No estoy seguro de entender esa consulta. Prueba preguntándome sobre: **admisión, carreras, horarios, ubicación, costos o contacto**.';
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const chatBody = document.getElementById('chatBody');
+
+        chatBody.innerHTML += `<div class="message user-msg">${text}</div>`;
+        input.value = '';
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        setTimeout(() => {
+            const respuestaBot = getBotResponse(text);
+            chatBody.innerHTML += `<div class="message bot-msg">${respuestaBot}</div>`;
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }, 400);
+    }
+</script>
+
+</body>
+</html>

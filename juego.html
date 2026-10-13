@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTLVTE - Juego</title>
+    <link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" type="image/x-icon">
+    <style>
+        :root { 
+            --utlvte-green: #008a3c; 
+            --utlvte-red: #d9232a; 
+            --dark-color: #222222; 
+            --bg-light: #f4f6f8; 
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-light); 
+            color: var(--dark-color); 
+            min-height: 100vh; 
+            position: relative; 
+        }
+        
+        /* MARCA DE AGUA DERECHA */
+        body::before { 
+            content: ""; 
+            position: fixed; 
+            top: 50%; 
+            right: 2%; 
+            transform: translateY(-50%); 
+            width: 500px; 
+            height: 500px; 
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png'); 
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: contain; 
+            opacity: 0.10; 
+            pointer-events: none; 
+            z-index: -1; 
+        }
+
+        /* CABECERA */
+        .top-header { background: #fff; padding: 15px 20px; display: flex; justify-content: center; border-bottom: 1px solid #e0e0e0; }
+        .brand-container { display: flex; align-items: center; gap: 20px; }
+        .header-logo { height: 85px; }
+        .brand-titles { text-align: center; }
+        .utlvte-main { color: var(--utlvte-green); font-size: 3rem; font-weight: 900; font-style: italic; line-height: 1; }
+        .utlvte-sub { color: var(--utlvte-red); font-size: 1.15rem; font-weight: bold; font-style: italic; }
+
+        /* NAVEGACIÓN */
+        .main-nav { background: var(--utlvte-green); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .nav-list { display: flex; justify-content: center; list-style: none; flex-wrap: wrap; }
+        .nav-link { display: block; padding: 14px 22px; color: #fff; text-decoration: none; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; transition: background 0.2s; }
+        .nav-link:hover { background: rgba(0, 0, 0, 0.15); }
+        .nav-item.active .nav-link { color: #ff3b30; }
+
+        /* CONTENEDOR PRINCIPAL */
+        .container { max-width: 1050px; margin: 30px auto; padding: 0 20px; }
+
+        /* CARD DE LA SOPA DE LETRAS */
+        .game-card {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 6px solid var(--utlvte-green);
+            position: relative;
+        }
+
+        .game-header { text-align: center; margin-bottom: 20px; }
+        .game-header h1 { color: var(--utlvte-green); font-size: 1.8rem; margin-bottom: 5px; }
+        .game-header p { color: #555; font-size: 0.95rem; }
+
+        .game-layout {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        /* TABLERO DE LETRAS (GRID 13x13) */
+        .soup-grid {
+            display: grid;
+            grid-template-columns: repeat(13, 32px);
+            grid-template-rows: repeat(13, 32px);
+            gap: 3px;
+            background: #eef2f5;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--utlvte-green);
+            user-select: none;
+        }
+
+        @media (max-width: 550px) {
+            .soup-grid {
+                grid-template-columns: repeat(13, 22px);
+                grid-template-rows: repeat(13, 22px);
+                gap: 2px;
+                padding: 4px;
+            }
+            .cell { font-size: 0.75rem !important; }
+        }
+
+        .cell {
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--dark-color);
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .cell:hover { background: #d0f0dd; }
+        .cell.selected { background: #ffeb3b; color: #000; transform: scale(0.95); }
+        .cell.found { background: var(--utlvte-green); color: white; pointer-events: none; }
+
+        /* PANEL DE PALABRAS */
+        .word-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--utlvte-red);
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .word-panel h3 { color: var(--utlvte-red); margin-bottom: 12px; font-size: 1.1rem; }
+
+        .word-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .word-item {
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #444;
+            padding: 6px 8px;
+            background: #fff;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .word-item.completed {
+            text-decoration: line-through;
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .btn-action {
+            background: var(--utlvte-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover { background: #006b2e; }
+
+        /* MENSAJE DE VICTORIA */
+        .win-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 10px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 10;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .win-title {
+            color: var(--utlvte-green);
+            font-size: 2.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .win-subtitle {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+            margin-bottom: 25px;
+        }
+
+        /* FOOTER Y CHATBOT */
+        footer { background: var(--dark-color); color: white; text-align: center; padding: 25px; margin-top: 50px; }
+        .chatbot-btn { position: fixed; bottom: 25px; right: 25px; background: var(--utlvte-green); color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 26px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 2000; }
+        .chat-window { display: none; position: fixed; bottom: 95px; right: 25px; width: 320px; height: 420px; background: #fff; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.25); flex-direction: column; z-index: 2000; }
+        .chat-header { background: var(--utlvte-green); color: white; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.88rem; }
+        .bot-msg { background: #e4e6eb; align-self: flex-start; }
+        .user-msg { background: var(--utlvte-green); color: white; align-self: flex-end; }
+        .chat-footer { display: flex; padding: 10px; border-top: 1px solid #ddd; }
+        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .chat-footer button { background: var(--utlvte-green); color: white; border: none; padding: 8px 12px; margin-left: 5px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA -->
+    <header class="top-header">
+        <div class="brand-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png" class="header-logo" alt="Escudo UTLVTE">
+            <div class="brand-titles">
+                <div class="utlvte-sub">UNIVERSIDAD TÉCNICA "LUIS VARGAS TORRES" DE ESMERALDAS</div>
+                <div class="utlvte-sub">SEDE SANTO DOMINGO - LA CONCORDIA</div>
+                <div class="utlvte-main">UTLVTE</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="main-nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="nosotros.html" class="nav-link">Nosotros</a></li>
+            <li class="nav-item"><a href="carreras.html" class="nav-link">Carreras</a></li>
+            <li class="nav-item"><a href="servicios.html" class="nav-link">Servicios</a></li>
+            <li class="nav-item"><a href="historia.html" class="nav-link">Historia</a></li>
+            <li class="nav-item"><a href="contacto.html" class="nav-link">Contacto</a></li>
+            <li class="nav-item active"><a href="juego.html" class="nav-link">Juego</a></li>
+            <li class="nav-item"><a href="emociones.html" class="nav-link">Emociones</a></li>
+            <li class="nav-item"><a href="promedio.html" class="nav-link">Promedio</a></li>
+        </ul>
+    </nav>
+
+    <!-- ÁREA DEL JUEGO -->
+    <main class="container">
+        <div class="game-card">
+            
+            <div class="game-header">
+                <h1>🔤 Sopa de Letras: Inteligencia Artificial</h1>
+                <p>Encuentra las 12 palabras escondidas en el tablero (Horizontales y Verticales).</p>
+            </div>
+
+            <div class="game-layout">
+                <!-- TABLERO -->
+                <div class="soup-grid" id="gridContainer"></div>
+
+                <!-- LISTA DE PALABRAS (12 PALABRAS) -->
+                <div class="word-panel">
+                    <h3>12 Palabras a buscar:</h3>
+                    <ul class="word-list" id="wordList">
+                        <li class="word-item" data-word="CHATBOT">CHATBOT</li>
+                        <li class="word-item" data-word="AGENTE">AGENTE</li>
+                        <li class="word-item" data-word="DATOS">DATOS</li>
+                        <li class="word-item" data-word="CODIGO">CODIGO</li>
+                        <li class="word-item" data-word="REDES">REDES</li>
+                        <li class="word-item" data-word="LOGICA">LOGICA</li>
+                        <li class="word-item" data-word="ROBOT">ROBOT</li>
+                        <li class="word-item" data-word="MATRIZ">MATRIZ</li>
+                        <li class="word-item" data-word="IA">IA</li>
+                        <li class="word-item" data-word="NUBE">NUBE</li>
+                        <li class="word-item" data-word="PROMPT">PROMPT</li>
+                        <li class="word-item" data-word="RED">RED</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-action" onclick="deshacerSeleccion()">Deshacer selección</button>
+                <span id="gameStatus" style="font-weight: bold; color: var(--utlvte-green);">Palabras: 0 / 12</span>
+            </div>
+
+            <!-- ENTORNO DE GANADOR EN GRANDE -->
+            <div class="win-overlay" id="winOverlay">
+                <div style="font-size: 4rem;">🏆</div>
+                <div class="win-title">FELICIDADES GANASTE</div>
+                <div class="win-subtitle">Encontraste las 12 palabras sobre Inteligencia Artificial.</div>
+                <button class="btn-action" onclick="reiniciarJuego()" style="font-size: 1.1rem; padding: 12px 25px;">🔄 Jugar de nuevo</button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- CHATBOT -->
+    <button class="chatbot-btn" onclick="toggleChat()">💬</button>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <span>Asistente UTLVTE</span>
+            <button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="message bot-msg">¡Hola! Hay 12 palabras ocultas en la sopa de letras. ¿Necesitas una pista?</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="userInput" placeholder="Escribe tu consulta..." onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Universidad Técnica Luis Vargas Torres de Esmeraldas - Sede Santo Domingo</p>
+    </footer>
+
+    <script>
+        // Tablero 13x13 con 12 palabras (Horizontales y Verticales)
+        const gridData = [
+            ['C', 'H', 'A', 'T', 'B', 'O', 'T', 'X', 'K', 'A', 'L', 'M', 'P'],
+            ['P', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'G', 'O', 'P', 'R'],
+            ['C', 'D', 'A', 'T', 'O', 'S', 'F', 'G', 'H', 'E', 'J', 'K', 'O'],
+            ['O', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'N', 'U', 'R', 'M'],
+            ['D', 'X', 'R', 'E', 'D', 'E', 'S', 'A', 'B', 'T', 'C', 'O', 'P'],
+            ['I', 'V', 'B', 'N', 'M', 'Q', 'W', 'E', 'R', 'E', 'T', 'B', 'T'],
+            ['G', 'H', 'J', 'K', 'L', 'O', 'G', 'I', 'C', 'A', 'P', 'O', 'A'],
+            ['O', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'T', 'B'],
+            ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Q', 'W', 'E', 'R', 'T', 'C'],
+            ['U', 'I', 'O', 'M', 'A', 'T', 'R', 'I', 'Z', 'P', 'A', 'S', 'D'],
+            ['D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B', 'I'],
+            ['N', 'U', 'B', 'E', 'E', 'R', 'E', 'D', 'U', 'I', 'O', 'P', 'A'],
+            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V']
+        ];
+
+        // Posiciones exactas de las 12 palabras
+        const palabrasUbicaciones = {
+            'CHATBOT': [[0,0], [0,1], [0,2], [0,3], [0,4], [0,5], [0,6]],  // H
+            'AGENTE':  [[0,9], [1,9], [2,9], [3,9], [4,9], [5,9]],         // V
+            'DATOS':   [[2,1], [2,2], [2,3], [2,4], [2,5]],                // H
+            'CODIGO':  [[2,0], [3,0], [4,0], [5,0], [6,0], [7,0]],         // V
+            'REDES':   [[4,2], [4,3], [4,4], [4,5], [4,6]],                // H
+            'LOGICA':  [[6,4], [6,5], [6,6], [6,7], [6,8], [6,9]],         // H
+            'ROBOT':   [[3,11],[4,11],[5,11],[6,11],[7,11]],               // V
+            'MATRIZ':  [[9,3], [9,4], [9,5], [9,6], [9,7], [9,8]],         // H
+            'PROMPT':  [[0,12],[1,12],[2,12],[3,12],[4,12],[5,12]],       // V
+            'NUBE':    [[11,0],[11,1],[11,2],[11,3]],                      // H
+            'RED':     [[11,5],[11,6],[11,7]],                             // H
+            'IA':      [[10,12],[11,12]]                                   // V
+        };
+
+        let seleccionadas = [];
+        let palabrasEncontradas = 0;
+        const totalPalabras = 12;
+
+        function renderGrid() {
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+
+            for (let r = 0; r < 13; r++) {
+                for (let c = 0; c < 13; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.innerText = gridData[r][c];
+                    cell.onclick = () => seleccionarCelda(cell, r, c);
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function seleccionarCelda(cell, r, c) {
+            if (cell.classList.contains('found')) return;
+
+            if (cell.classList.contains('selected')) {
+                cell.classList.remove('selected');
+                seleccionadas = seleccionadas.filter(p => !(p.r === r && p.c === c));
+            } else {
+                cell.classList.add('selected');
+                seleccionadas.push({ r, c, cell });
+            }
+
+            verificarPalabras();
+        }
+
+        function verificarPalabras() {
+            for (let word in palabrasUbicaciones) {
+                const coords = palabrasUbicaciones[word];
+                
+                if (coords.length === seleccionadas.length) {
+                    let esCoincidencia = coords.every(coord => 
+                        seleccionadas.some(s => s.r === coord[0] && s.c === coord[1])
+                    );
+
+                    if (esCoincidencia) {
+                        seleccionadas.forEach(s => {
+                            s.cell.classList.remove('selected');
+                            s.cell.classList.add('found');
+                        });
+
+                        document.querySelector(`[data-word="${word}"]`).classList.add('completed');
+                        delete palabrasUbicaciones[word];
+                        seleccionadas = [];
+                        palabrasEncontradas++;
+
+                        document.getElementById('gameStatus').innerText = `Palabras: ${palabrasEncontradas} / ${totalPalabras}`;
+
+                        if (palabrasEncontradas === totalPalabras) {
+                            document.getElementById('winOverlay').style.display = 'flex';
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        function deshacerSeleccion() {
+            seleccionadas.forEach(s => s.cell.classList.remove('selected'));
+            seleccionadas = [];
+        }
+
+        function reiniciarJuego() {
+            location.reload();
+        }
+
+        renderGrid();
+
+        // CHATBOT JS
+        function toggleChat() {
+            const chat = document.getElementById('chatWindow');
+            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const b = document.getElementById('chatBody');
+            b.innerHTML += `<div class="message user-msg">${text}</div>`;
+            input.value = '';
+            b.scrollTop = b.scrollHeight;
+
+            setTimeout(() => {
+                b.innerHTML += `<div class="message bot-msg">Prueba buscar la palabra PROMPT en la última columna a la derecha de forma vertical.</div>`;
+                b.scrollTop = b.scrollHeight;
+            }, 500);
+        }
+    </script>
+</body>
+</html>

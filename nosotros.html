@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTLVTE - Nosotros</title>
+    <link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" type="image/x-icon">
+    <style>
+        :root { --utlvte-green: #008a3c; --utlvte-red: #d9232a; --dark-color: #222222; --bg-light: #f4f6f8; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--dark-color); min-height: 100vh; position: relative; }
+        body::before { content: ""; position: fixed; top: 50%; right: 2%; transform: translateY(-50%); width: 500px; height: 500px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png'); background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.10; pointer-events: none; z-index: -1; }
+        .top-header { background: #fff; padding: 15px 20px; display: flex; justify-content: center; border-bottom: 1px solid #e0e0e0; }
+        .brand-container { display: flex; align-items: center; gap: 20px; }
+        .header-logo { height: 85px; }
+        .brand-titles { text-align: center; }
+        .utlvte-main { color: var(--utlvte-green); font-size: 3rem; font-weight: 900; font-style: italic; line-height: 1; }
+        .utlvte-sub { color: var(--utlvte-red); font-size: 1.15rem; font-weight: bold; font-style: italic; }
+        .main-nav { background: var(--utlvte-green); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .nav-list { display: flex; justify-content: center; list-style: none; }
+        .nav-link { display: block; padding: 14px 22px; color: #fff; text-decoration: none; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; }
+        .nav-link:hover { background: rgba(0, 0, 0, 0.15); }
+        .nav-item.active .nav-link { color: #ff3b30; }
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 25px; }
+        .card { background: rgba(255,255,255,0.95); padding: 25px; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); border-top: 5px solid var(--utlvte-green); }
+        .card h2 { color: var(--utlvte-green); margin-bottom: 12px; }
+        footer { background: var(--dark-color); color: white; text-align: center; padding: 25px; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <header class="top-header">
+        <div class="brand-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png" class="header-logo">
+            <div class="brand-titles">
+                <div class="utlvte-sub">UNIVERSIDAD TÉCNICA "LUIS VARGAS TORRES" DE ESMERALDAS</div>
+                <div class="utlvte-sub">SEDE SANTO DOMINGO - LA CONCORDIA</div>
+                <div class="utlvte-main">UTLVTE</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="historia.html" class="nav-link">Historia</a></li>
+            <li class="nav-item active"><a href="nosotros.html" class="nav-link">Nosotros</a></li>
+            <li class="nav-item"><a href="servicios.html" class="nav-link">Servicios</a></li>
+            <li class="nav-item"><a href="carreras.html" class="nav-link">Carreras</a></li>
+            <li class="nav-item"><a href="contacto.html" class="nav-link">Contacto</a></li>
+            <li class="nav-item"><a href="juego.html" class="nav-link">Juego</a></li>
+            <li class="nav-item"><a href="emociones.html" class="nav-link">Emociones</a></li>
+            <li class="nav-item"><a href="promedio.html" class="nav-link">Promedio</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2>Sobre Nosotros</h2>
+            <p>La Universidad Técnica "Luis Vargas Torres" Sede Santo Domingo es una institución de educación superior pública, comprometida con la excelencia académica, la investigación y la vinculación con la comunidad.</p>
+        </section>
+
+        <section class="card">
+            <h2>Misión</h2>
+            <p>Formar profesionales integrales, competentes y críticos, capaces de generar conocimiento científico e innovación tecnológica orientada a la solución de problemas regionales y nacionales.</p>
+        </section>
+
+        <section class="card">
+            <h2>Visión</h2>
+            <p>Ser una sede universitaria de referencia nacional por su liderazgo académico, investigación aplicada con alto impacto social e inclusión educativa.</p>
+        </section>
+    </main>
+    
+
+    <footer><p>&copy; 2026 Universidad Técnica Luis Vargas Torres de Esmeraldas - Sede Santo Domingo</p></footer>
+</body>
+</html>s

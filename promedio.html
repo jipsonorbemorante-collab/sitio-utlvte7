@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTLVTE - Calculadora de Promedio Académico</title>
+    <link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/commons/2/20/ESCUDETO_UTE-LVT.png" type="image/x-icon">
+    <style>
+        :root { 
+            --utlvte-green: #008a3c; 
+            --utlvte-red: #d9232a; 
+            --dark-color: #222222; 
+            --bg-light: #f4f6f8; 
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--dark-color); min-height: 100vh; position: relative; }
+        
+        /* MARCA DE AGUA DERECHA (10% Opacidad) */
+        body::before { 
+            content: ""; position: fixed; top: 50%; right: 2%; transform: translateY(-50%); 
+            width: 500px; height: 500px; 
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png'); 
+            background-repeat: no-repeat; background-position: center; background-size: contain; 
+            opacity: 0.10; pointer-events: none; z-index: -1; 
+        }
+
+        /* CABECERA */
+        .top-header { background: #fff; padding: 15px 20px; display: flex; justify-content: center; border-bottom: 1px solid #e0e0e0; }
+        .brand-container { display: flex; align-items: center; gap: 20px; }
+        .header-logo { height: 85px; }
+        .brand-titles { text-align: center; }
+        .utlvte-main { color: var(--utlvte-green); font-size: 3rem; font-weight: 900; font-style: italic; line-height: 1; }
+        .utlvte-sub { color: var(--utlvte-red); font-size: 1.15rem; font-weight: bold; font-style: italic; }
+
+        /* NAVEGACIÓN */
+        .main-nav { background: var(--utlvte-green); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .nav-list { display: flex; justify-content: center; list-style: none; flex-wrap: wrap; }
+        .nav-link { display: block; padding: 14px 22px; color: #fff; text-decoration: none; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; transition: background 0.2s; }
+        .nav-link:hover { background: rgba(0, 0, 0, 0.15); }
+        .nav-item.active .nav-link { color: #ff3b30; }
+
+        /* CONTENEDOR PRINCIPAL */
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 25px; }
+
+        .card { background: rgba(255,255,255,0.98); padding: 25px; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); border-top: 5px solid var(--utlvte-green); }
+        .card h2 { color: var(--utlvte-green); margin-bottom: 15px; font-size: 1.5rem; }
+
+        /* PANEL RESUMEN GENERAL */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .summary-box { background: #f8f9fa; padding: 18px; border-radius: 8px; border-left: 4px solid var(--utlvte-green); text-align: center; }
+        .summary-box.red { border-left-color: var(--utlvte-red); }
+        .summary-val { font-size: 2.2rem; font-weight: 900; color: var(--utlvte-green); margin-top: 5px; }
+        .summary-val.red { color: var(--utlvte-red); }
+
+        /* FORMULARIO Y TABLA DE MATERIAS */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.85rem; font-weight: bold; color: #444; }
+        .form-group input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
+
+        .btn-add { background: var(--utlvte-green); color: white; border: none; padding: 11px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .btn-add:hover { background: #006b2e; }
+
+        /* TABLA DESCRIPTIVA */
+        .table-responsive { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; font-size: 0.92rem; }
+        th { background: var(--utlvte-green); color: white; font-weight: 700; }
+        tr:hover { background: #f1f8f3; }
+
+        .badge-status { padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; color: white; display: inline-block; }
+        .bg-aprobado { background-color: #28a745; }
+        .bg-supletorio { background-color: #ffc107; color: #333; }
+        .bg-reprobado { background-color: #dc3545; }
+
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+
+        /* SIMULADOR DE NOTA FALTANTE */
+        .simulator-card { background: #eef7f2; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; }
+        .sim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end; }
+
+        /* FOOTER Y CHATBOT */
+        footer { background: var(--dark-color); color: white; text-align: center; padding: 25px; margin-top: 50px; }
+        .chatbot-btn { position: fixed; bottom: 25px; right: 25px; background: var(--utlvte-green); color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 26px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 2000; }
+        .chat-window { display: none; position: fixed; bottom: 95px; right: 25px; width: 320px; height: 420px; background: #fff; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.25); flex-direction: column; z-index: 2000; }
+        .chat-header { background: var(--utlvte-green); color: white; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.88rem; }
+        .bot-msg { background: #e4e6eb; align-self: flex-start; }
+        .user-msg { background: var(--utlvte-green); color: white; align-self: flex-end; }
+        .chat-footer { display: flex; padding: 10px; border-top: 1px solid #ddd; }
+        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .chat-footer button { background: var(--utlvte-green); color: white; border: none; padding: 8px 12px; margin-left: 5px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA SUPERIOR -->
+    <header class="top-header">
+        <div class="brand-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/ESCUDETO_UTE-LVT.png/500px-ESCUDETO_UTE-LVT.png" class="header-logo" alt="Escudo UTLVTE">
+            <div class="brand-titles">
+                <div class="utlvte-sub">UNIVERSIDAD TÉCNICA "LUIS VARGAS TORRES" DE ESMERALDAS</div>
+                <div class="utlvte-sub">SEDE SANTO DOMINGO - LA CONCORDIA</div>
+                <div class="utlvte-main">UTLVTE</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="main-nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="index.html" class="nav-link">Inicio</a></li>
+            <li class="nav-item"><a href="nosotros.html" class="nav-link">Nosotros</a></li>
+            <li class="nav-item"><a href="carreras.html" class="nav-link">Carreras</a></li>
+            <li class="nav-item"><a href="servicios.html" class="nav-link">Servicios</a></li>
+            <li class="nav-item"><a href="historia.html" class="nav-link">Historia</a></li>
+            <li class="nav-item"><a href="contacto.html" class="nav-link">Contacto</a></li>
+            <li class="nav-item"><a href="juego.html" class="nav-link">Juego</a></li>
+            <li class="nav-item"><a href="emociones.html" class="nav-link">Emociones</a></li>
+            <li class="nav-item active"><a href="promedio.html" class="nav-link">Promedio</a></li>
+        </ul>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container">
+        
+        <!-- BIENVENIDA Y RESUMEN GENERAL -->
+        <section class="card">
+            <h2>📊 Calculadora de Promedio Académico UTLVTE</h2>
+            <p style="margin-bottom: 20px; color: #555;">Sistema de control de calificaciones y cálculo del promedio semestral para estudiantes de la Sede Santo Domingo.</p>
+
+            <div class="summary-grid">
+                <div class="summary-box">
+                    <span>Promedio General Semestral</span>
+                    <div class="summary-val" id="promedioGeneral">0.00</div>
+                </div>
+                <div class="summary-box">
+                    <span>Total Materias Registradas</span>
+                    <div class="summary-val" id="totalMaterias">0</div>
+                </div>
+                <div class="summary-box red">
+                    <span>Estado Académico Global</span>
+                    <div class="summary-val red" id="estadoGlobal" style="font-size:1.4rem; margin-top:12px;">Sin datos</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AGREGAR NUEVA MATERIA -->
+        <section class="card">
+            <h2>➕ Registrar Asignatura</h2>
+            <form id="materiaForm" onsubmit="agregarMateria(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre de la Materia</label>
+                        <input type="text" id="nombreMateria" placeholder="Ej. Programación I" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Parcial 1 (0 - 10)</label>
+                        <input type="number" id="p1" step="0.1" min="0" max="10" placeholder="0.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Parcial 2 (0 - 10)</label>
+                        <input type="number" id="p2" step="0.1" min="0" max="10" placeholder="0.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Examen / Trabajo (0 - 10)</label>
+                        <input type="number" id="p3" step="0.1" min="0" max="10" placeholder="0.0" required>
+                    </div>
+                    <button type="submit" class="btn-add">Guardar Materia</button>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Materia</th>
+                            <th>Parcial 1</th>
+                            <th>Parcial 2</th>
+                            <th>Examen / Trab.</th>
+                            <th>Promedio</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaMaterias">
+                        <!-- Las materias se renderizan aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SIMULADOR DE NOTA FALTANTE -->
+        <section class="card simulator-card">
+            <h2 style="color: var(--utlvte-green);">🎯 Simulador: ¿Cuánto necesito en el 2do Parcial para aprobar?</h2>
+            <p style="margin-bottom: 15px; font-size:0.92rem; color:#444;">Si ya tienes tu nota del 1er Parcial, ingresa el valor para calcular cuánto necesitas en el 2do Parcial para alcanzar la nota mínima de aprobación (7.0).</p>
+
+            <div class="sim-grid">
+                <div class="form-group">
+                    <label>Tu Nota en Parcial 1</label>
+                    <input type="number" id="simP1" step="0.1" min="0" max="10" placeholder="Ej. 6.5" oninput="calcularNotaNecesaria()">
+                </div>
+                <div class="form-group">
+                    <label>Nota Necesaria en Parcial 2</label>
+                    <input type="text" id="simResultado" readonly style="font-weight:bold; background:#fff; color:var(--utlvte-green);" value="Esperando nota...">
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CHATBOT -->
+    <button class="chatbot-btn" onclick="toggleChat()">💬</button>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <span>Asistente UTLVTE</span>
+            <button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="message bot-msg">¡Hola! Puedes registrar tus notas para calcular tu promedio o saber cuánto necesitas para aprobar.</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="userInput" placeholder="Escribe tu consulta..." onkeypress="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Universidad Técnica Luis Vargas Torres de Esmeraldas - Sede Santo Domingo</p>
+    </footer>
+
+    <script>
+        let materias = JSON.parse(localStorage.getItem('utlvte_materias')) || [];
+
+        function guardarStorage() {
+            localStorage.setItem('utlvte_materias', JSON.stringify(materias));
+        }
+
+        function agregarMateria(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nombreMateria').value.trim();
+            const p1 = parseFloat(document.getElementById('p1').value);
+            const p2 = parseFloat(document.getElementById('p2').value);
+            const p3 = parseFloat(document.getElementById('p3').value);
+
+            const promedio = parseFloat(((p1 + p2 + p3) / 3).toFixed(2));
+
+            materias.push({ id: Date.now(), nombre, p1, p2, p3, promedio });
+            guardarStorage();
+            document.getElementById('materiaForm').reset();
+            renderizarTabla();
+        }
+
+        function eliminarMateria(id) {
+            materias = materias.filter(m => m.id !== id);
+            guardarStorage();
+            renderizarTabla();
+        }
+
+        function renderizarTabla() {
+            const tbody = document.getElementById('tablaMaterias');
+            tbody.innerHTML = '';
+
+            if (materias.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#888;">No has registrado asignaturas aún.</td></tr>`;
+                document.getElementById('promedioGeneral').innerText = '0.00';
+                document.getElementById('totalMaterias').innerText = '0';
+                document.getElementById('estadoGlobal').innerText = 'Sin datos';
+                return;
+            }
+
+            let sumaPromedios = 0;
+
+            materias.forEach(m => {
+                sumaPromedios += m.promedio;
+                let estadoClass = '';
+                let estadoTexto = '';
+
+                if (m.promedio >= 7.0) {
+                    estadoClass = 'bg-aprobado';
+                    estadoTexto = 'Aprobado';
+                } else if (m.promedio >= 5.0) {
+                    estadoClass = 'bg-supletorio';
+                    estadoTexto = 'Supletorio';
+                } else {
+                    estadoClass = 'bg-reprobado';
+                    estadoTexto = 'Reprobado';
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${m.nombre}</b></td>
+                        <td>${m.p1.toFixed(1)}</td>
+                        <td>${m.p2.toFixed(1)}</td>
+                        <td>${m.p3.toFixed(1)}</td>
+                        <td><b>${m.promedio.toFixed(2)}</b></td>
+                        <td><span class="badge-status ${estadoClass}">${estadoTexto}</span></td>
+                        <td><button class="btn-delete" onclick="eliminarMateria(${m.id})">🗑️ Eliminar</button></td>
+                    </tr>
+                `;
+            });
+
+            const promedioGen = (sumaPromedios / materias.length).toFixed(2);
+            document.getElementById('promedioGeneral').innerText = promedioGen;
+            document.getElementById('totalMaterias').innerText = materias.length;
+
+            const estadoEl = document.getElementById('estadoGlobal');
+            if (promedioGen >= 7.0) {
+                estadoEl.innerText = 'Excelente (Aprobado)';
+                estadoEl.className = 'summary-val';
+            } else {
+                estadoEl.innerText = 'En Riesgo Académico';
+                estadoEl.className = 'summary-val red';
+            }
+        }
+
+        function calcularNotaNecesaria() {
+            const p1 = parseFloat(document.getElementById('simP1').value);
+            const resEl = document.getElementById('simResultado');
+
+            if (isNaN(p1) || p1 < 0 || p1 > 10) {
+                resEl.value = 'Ingresa una nota válida';
+                return;
+            }
+
+            // Nota requerida para que el promedio (p1 + p2) / 2 sea >= 7.0
+            const p2Necesario = (14 - p1).toFixed(1);
+
+            if (p2Necesario <= 0) {
+                resEl.value = '¡Ya estás aprobado! (0.0 requerido)';
+            } else if (p2Necesario > 10) {
+                resEl.value = `Necesitas ${p2Necesario} (Debes ir a Supletorio)`;
+            } else {
+                resEl.value = `Necesitas mínimo ${p2Necesario} en P2`;
+            }
+        }
+
+        renderizarTabla();
+
+        // CHATBOT JS
+        function toggleChat() {
+            const chat = document.getElementById('chatWindow');
+            chat.style.display = (chat.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const b = document.getElementById('chatBody');
+            b.innerHTML += `<div class="message user-msg">${text}</div>`;
+            input.value = '';
+            b.scrollTop = b.scrollHeight;
+
+            setTimeout(() => {
+                b.innerHTML += `<div class="message bot-msg">Para aprobar una asignatura en la UTLVTE necesitas un promedio mínimo de 7.0 sobre 10.</div>`;
+                b.scrollTop = b.scrollHeight;
+            }, 500);
+        }
+    </script>
+</body>
+</html>
